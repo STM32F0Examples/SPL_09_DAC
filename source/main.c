@@ -19,9 +19,12 @@ void dac_output(float dac_val);
 
 int main(void){
 	setToMaxSpeed();
-	dac_init(2.5);
+	dac_init(0.0);
 	while(1){
-		
+		for(float volts=0.0; volts<=3.0; volts+=0.1 ){
+			dac_output(volts);
+			for(int i=0;i<0x7FFFFF;i++);//wait some time
+		}
 	}
 }
 
@@ -63,11 +66,11 @@ void dac_init(float initial_output){
 	myDAC.DAC_OutputBuffer=DAC_OutputBuffer_Enable;
 	DAC_Init(DAC_Channel_1,&myDAC);
 	
-	DAC_SetChannel1Data(DAC_Align_12b_R,((uint16_t)(initial_output*(4095/3.3))));
+	DAC_SetChannel1Data(DAC_Align_12b_R,((uint16_t)(initial_output*(4095/3.27))));
 	
 	DAC_Cmd(DAC_Channel_1,ENABLE);
 }
 
 void dac_output(float dac_val){
-	DAC_SetChannel1Data(DAC_Align_12b_R,((uint16_t)(dac_val*(4095/3.3))));
+	DAC_SetChannel1Data(DAC_Align_12b_R,((uint16_t)(dac_val*(4095/3.27))));
 }
