@@ -5,8 +5,21 @@
  */
 void setToMaxSpeed(void);
 
+/**
+ * Configures  the DAC in Pin PA4
+ * @param initial_output the DAC output value right after initialization is completed
+ */
+void dac_init(float initial_output);
+
+/**
+ * Set the output value of the DAC
+ * @param dac_val DAC output in volts
+ */
+void dac_output(float dac_val);
+
 int main(void){
 	setToMaxSpeed();
+	dac_init(2.5);
 	while(1){
 		
 	}
@@ -30,3 +43,31 @@ void setToMaxSpeed(void){
 	}
 }
 
+void dac_init(float initial_output){
+	//Configure PA4 as analog pin
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA,ENABLE);
+	
+	GPIO_InitTypeDef myGPIO;
+	GPIO_StructInit(&myGPIO);
+	myGPIO.GPIO_Pin=GPIO_Pin_4;
+	myGPIO.GPIO_Mode=GPIO_Mode_AN;
+	GPIO_Init(GPIOA,&myGPIO);
+	
+	//Configure DAC
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_DAC,ENABLE);
+	
+	DAC_InitTypeDef myDAC;
+	DAC_StructInit(&myDAC);
+	myDAC.DAC_Trigger=DAC_Trigger_None;
+	myDAC.DAC_WaveGeneration=DAC_WaveGeneration_None;
+	myDAC.DAC_OutputBuffer=DAC_OutputBuffer_Enable;
+	DAC_Init(DAC_Channel_1,&myDAC);
+	
+	DAC_SetChannel1Data(DAC_Align_12b_R,((uint16_t)(initial_output*(4095/3.3))));
+	
+	DAC_Cmd(DAC_Channel_1,ENABLE);
+}
+
+void dac_output(float dac_val){
+	DAC_SetChannel1Data(DAC_Align_12b_R,((uint16_t)(dac_val*(4095/3.3))));
+}
